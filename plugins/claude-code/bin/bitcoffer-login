@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+// PATH shim: while this plugin is enabled, `bin/` is on the Bash tool's PATH,
+// so skills can call `bitcoffer-login` without knowing where the plugin lives.
+// Forwards argv to scripts/bitcoffer-login.mjs.
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const script = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'scripts', 'bitcoffer-login.mjs');
+import(script).catch((e) => {
+  console.error('[bitcoffer-login] failed:', e.message);
+  process.exit(1);
+});
