@@ -1,11 +1,10 @@
 #!/usr/bin/env sh
 # bitcoffer-launch.sh — zero-config launcher for the bitcoffer MCP server.
 #
-# A Claude Code plugin declares its MCP server statically in plugin.json, but
-# bitcoffer needs a per-machine BITCOFFER_VAULT_DIR (fail-closed if missing) and must
+# Bitcoffer needs a per-machine BITCOFFER_VAULT_DIR (fail-closed if missing) and must
 # run from the App-signed binary. This wrapper resolves both at connect time so
-# the plugin works with zero per-user config once the Bitcoffer app is installed
-# and unlocked once on that machine.
+# a host can start the MCP server with zero per-user config once the Bitcoffer app
+# is installed and unlocked once on that machine.
 #
 # Resolution order:
 #   binary:  $BITCOFFER_BIN → App helper under /Applications → bitcoffer on PATH (warn)

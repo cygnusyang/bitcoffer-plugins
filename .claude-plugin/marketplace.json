@@ -1,8 +1,0 @@
-{
-  "name": "bitcoffer",
-  "description": "Bitcoffer — local-first password manager; plugins for AI coding tools (use secrets, never read them)",
-  "owner": { "name": "cygnusyang" },
-  "plugins": [
-    { "name": "bitcoffer", "source": "./plugins/claude-code" }
-  ]
-}

@@ -3,7 +3,7 @@
 //
 // The password reaches this process ONLY through an env var (--password-env);
 // it never appears in argv, stdout, stderr, or logs, so it never enters
-// Claude's context. This script fills a login form and (optionally) submits
+// the model context. This script fills a login form and (optionally) submits
 // it in a persistent Chromium profile so the session survives future runs.
 //
 // Modes:
@@ -11,7 +11,7 @@
 //   filled: --no-submit        fill fields but leave the submit to a human
 //   login:  (default)          fill and submit, wait for a success signal
 //
-// Usage via mcp__bitcoffer__run_with_secret:
+// Usage via run_with_secret:
 //   run_with_secret {
 //     secret: "<bitcoffer secret name>",
 //     cmd: "node",

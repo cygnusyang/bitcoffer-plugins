@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+// PATH shim: when this file (or this directory) is on PATH, skills and hosts
+// can call `bitcoffer-login` without knowing the repo layout.
+// Forwards argv to bitcoffer-login.mjs beside this file.
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const script = path.join(path.dirname(fileURLToPath(import.meta.url)), 'bitcoffer-login.mjs');
+import(script).catch((e) => {
+  console.error('[bitcoffer-login] failed:', e.message);
+  process.exit(1);
+});
