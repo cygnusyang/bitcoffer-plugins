@@ -6,7 +6,7 @@
 BIN="/Applications/Bitcoffer.app/Contents/Helpers/bitcoffer.app/Contents/MacOS/bitcoffer"
 VAULT="$HOME/.bitcoffer/vaults/<your-uuid>"   # replace
 mkdir -p ~/.codex
-# 若已有 [mcp_servers.bitcoffer] 先删旧表再追加
+# If [mcp_servers.bitcoffer] already exists, delete the old table first, then append
 cat >> ~/.codex/config.toml <<EOF
 
 [mcp_servers.bitcoffer]
@@ -18,12 +18,12 @@ BITCOFFER_VAULT_DIR = "${VAULT}"
 EOF
 ```
 
-重启 Codex。
+Restart Codex.
 
-## 2) 规则
+## 2) Rules
 
-项目根 `AGENTS.md` 追加 [rules.md](rules.md)。
+Append [rules.md](rules.md) to `AGENTS.md` at the project root.
 
-## 3) 验收
+## 3) Acceptance
 
-Codex 会话出现 4 个 bitcoffer 工具；或跑 [通用 probe](README.md)。
+The Codex session should show 4 bitcoffer tools; or run the [universal probe](README.md).

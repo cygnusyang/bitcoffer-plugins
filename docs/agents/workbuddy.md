@@ -1,11 +1,11 @@
 # WorkBuddy ← Bitcoffer
 
-落点：`~/.workbuddy/mcp.json`。**只增改 `mcpServers.bitcoffer`，不要整文件覆盖。**
+Drop path: `~/.workbuddy/mcp.json`. **Only add or update `mcpServers.bitcoffer`; do not overwrite the whole file.**
 
 ## 1) MCP
 
-把下面保存为 `/tmp/add-bitcoffer-workbuddy-mcp.py` 后执行
-`BITCOFFER_VAULT_DIR=$HOME/.bitcoffer/vaults/<uuid> python3 /tmp/add-bitcoffer-workbuddy-mcp.py`：
+Save the following as `/tmp/add-bitcoffer-workbuddy-mcp.py`, then run
+`BITCOFFER_VAULT_DIR=$HOME/.bitcoffer/vaults/<uuid> python3 /tmp/add-bitcoffer-workbuddy-mcp.py`:
 
 ```python
 import json, pathlib, os
@@ -26,10 +26,10 @@ path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + chr(10))
 print("wrote", path)
 ```
 
-## 2) 规则
+## 2) Rules
 
-项目根 `CODEBUDDY.md` 或 `AGENTS.md` 追加 [rules.md](rules.md)。
+Append [rules.md](rules.md) to `CODEBUDDY.md` or `AGENTS.md` at the project root.
 
-## 3) 验收
+## 3) Acceptance
 
-重启 WorkBuddy 后见 `bitcoffer`（4 tools）；或跑 [通用 probe](README.md)。
+After restarting WorkBuddy, `bitcoffer` should appear (4 tools); or run the [universal probe](README.md).

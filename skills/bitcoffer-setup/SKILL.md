@@ -3,54 +3,54 @@ name: bitcoffer-setup
 description: Diagnose and repair the Bitcoffer MCP connection — run when Bitcoffer tools are missing, the server fails to connect, or on a brand-new machine/first run
 ---
 
-# Bitcoffer Setup — 诊断与修复 bitcoffer MCP 连接
+# Bitcoffer Setup — Diagnose and repair the bitcoffer MCP connection
 
-当 Bitcoffer MCP 工具缺失、服务器连接失败，或第一次在新机器上使用 bitcoffer 时使用本 skill。按顺序排查，最快命中根因。
+Use this skill when Bitcoffer MCP tools are missing, the server fails to connect, or you are using bitcoffer for the first time on a new machine. Work through the checks in order; that is the fastest way to hit the root cause.
 
-官网下载：https://ai.cygnusyang.top/bitcoffer/
+Download: https://ai.cygnusyang.top/bitcoffer/
 
-## 诊断顺序
+## Diagnostic order
 
-### 1. 前置三要素
+### 1. Three prerequisites
 
-**a. Bitcoffer App 已安装（必须有内嵌 helper）**：
+**a. The Bitcoffer App is installed (the embedded helper is required)**:
 
 ```
 test -x /Applications/Bitcoffer.app/Contents/Helpers/bitcoffer.app/Contents/MacOS/bitcoffer && echo OK || echo MISSING
 ```
 
-缺失 → 提示用户从 https://ai.cygnusyang.top/bitcoffer/ 安装 Bitcoffer App，装好后再来。
+If missing → tell the user to install the Bitcoffer App from https://ai.cygnusyang.top/bitcoffer/, then come back.
 
-**b. vault 已存在**：
+**b. A vault already exists**:
 
-文档口径中的本机库目录是 `~/.bitcoffer/vaults/`（其下为 UUID 子目录）：
+The documented local vault directory is `~/.bitcoffer/vaults/` (UUID subdirectories underneath):
 
 ```
 ls "$HOME/.bitcoffer/vaults/"
 ```
 
-为空 → 提示用户先打开 Bitcoffer App 创建/解锁一次 vault。覆盖探测时可设 `BITCOFFER_VAULT_DIR` 指向某一座库的目录（`~/.bitcoffer/vaults/<uuid>`）。
+If empty → tell the user to open the Bitcoffer App and create or unlock a vault once. To override detection, set `BITCOFFER_VAULT_DIR` to a specific vault directory (`~/.bitcoffer/vaults/<uuid>`).
 
-**c. Keychain escrow 已建立（本机解锁过一次）**：
+**c. Keychain escrow already exists (this machine has been unlocked once)**:
 
-escrow 是每机每用户的。最直接的验证：用共享启动脚本 `scripts/bitcoffer-launch.sh` 试连，看日志是否出现 `vault unlocked via MCP keychain escrow`。若报未启用 MCP 解锁托管 → 提示用户：App 设置 → MCP / Agent 协作 → 启用「MCP 解锁托管」，并解锁一次。
+Escrow is per machine, per user. The most direct check: try connecting with the shared launch script `scripts/bitcoffer-launch.sh` and look in the logs for `vault unlocked via MCP keychain escrow`. If it reports that MCP 解锁托管 (*MCP unlock escrow*) is not enabled → tell the user: App Settings → MCP / Agent 协作 (*MCP / Agent collaboration*) → enable "MCP 解锁托管" (*MCP unlock escrow*), and unlock once.
 
-### 2. 启动脚本与覆盖
+### 2. Launch script and overrides
 
-推荐让宿主的 MCP `command` 指向仓库共享脚本 `scripts/bitcoffer-launch.sh`（连接时自动探测 App 签名二进制与本机 vault）。一般不需要手写路径；必要时用环境变量覆盖：
+Prefer pointing the host's MCP `command` at the shared script `scripts/bitcoffer-launch.sh` (it auto-detects the App-signed binary and the local vault on connect). You usually do not need to write paths by hand; override with environment variables when needed:
 
-- `BITCOFFER_BIN` — 指定 bitcoffer 二进制
-- `BITCOFFER_VAULT_DIR` — 指定某一座库的目录
+- `BITCOFFER_BIN` — set the bitcoffer binary
+- `BITCOFFER_VAULT_DIR` — set a specific vault directory
 
-bitcoffer 必须从 App 内路径运行；PATH 上的 bare 二进制可能因签名/Keychain 上下文失败。
+bitcoffer must run from the in-App path; a bare binary on PATH may fail because of signing / Keychain context.
 
-## 完成标准
+## Done when
 
-- 宿主里 bitcoffer MCP 已连接，且协议工具可用：`list_secret_names` / `list_secrets` / `run_with_secret` / `get_secret_metadata`（共 4 个；**值仍不会返回**）。
-- `list_secret_names` 能返回名字列表。
+- The bitcoffer MCP server is connected in the host, and the protocol tools are available: `list_secret_names` / `list_secrets` / `run_with_secret` / `get_secret_metadata` (4 in total; **values are still never returned**).
+- `list_secret_names` returns a list of names.
 
-若以上都通过仍连不上，把宿主的 MCP 连接状态和 launch 日志交给用户/上报。
+If all of the above pass and it still will not connect, give the host's MCP connection status and the launch logs to the user / report them.
 
-## 附录：宿主配置
+## Appendix: host configuration
 
-各宿主如何登记 MCP、检查连接状态，以仓库 [`docs/agents/`](../../docs/agents/) 为准，不要在本 skill 里写死某一宿主的 CLI 命令。
+How each host registers MCP and how to check the connection status is documented in [`docs/agents/`](../../docs/agents/) in this repo. Do not hard-code any one host's CLI commands in this skill.

@@ -1,16 +1,16 @@
 # Claude Code ← Bitcoffer
 
-与其它宿主相同：MCP 配置指向共享启动脚本 [`scripts/bitcoffer-launch.sh`](../../scripts/bitcoffer-launch.sh)，规则走 [rules.md](rules.md)。共享技能见仓库根 [`skills/`](../../skills/)。
+Same as the other hosts: point MCP config at the shared launch script [`scripts/bitcoffer-launch.sh`](../../scripts/bitcoffer-launch.sh), and use the rules in [rules.md](rules.md). Shared skills live at the repo root under [`skills/`](../../skills/).
 
 ## 1) MCP
 
-`scripts/bitcoffer-launch.sh` 在连接时自动解析 App 签名二进制与本机 vault（可用 `BITCOFFER_VAULT_DIR` / `BITCOFFER_BIN` 覆盖）。把路径换成你本机克隆或拷贝后的脚本位置：
+`scripts/bitcoffer-launch.sh` resolves the App-signed binary and the local vault on connect (override with `BITCOFFER_VAULT_DIR` / `BITCOFFER_BIN`). Replace the path with the script location after you clone or copy this repo:
 
 ```bash
 claude mcp add --scope user bitcoffer -- /path/to/bitcoffer/scripts/bitcoffer-launch.sh
 ```
 
-或项目级 `.mcp.json`（把路径换成真实值）：
+Or a project-level `.mcp.json` (replace the path with a real value):
 
 ```json
 {
@@ -22,7 +22,7 @@ claude mcp add --scope user bitcoffer -- /path/to/bitcoffer/scripts/bitcoffer-la
 }
 ```
 
-也可以直接登记 helper 二进制并显式传入 vault 目录：
+You can also register the helper binary directly and pass the vault directory explicitly:
 
 ```bash
 BIN="/Applications/Bitcoffer.app/Contents/Helpers/bitcoffer.app/Contents/MacOS/bitcoffer"
@@ -33,15 +33,15 @@ claude mcp add --scope user bitcoffer \
   -- "$BIN" mcp --provider bitcoffer
 ```
 
-## 2) 规则
+## 2) Rules
 
-项目根 `CLAUDE.md` 追加 [rules.md](rules.md)。
+Append [rules.md](rules.md) to `CLAUDE.md` at the project root.
 
-## 3) 验收
+## 3) Acceptance
 
 ```bash
 claude mcp list
-# 期望：bitcoffer Connected；4 tools
+# expect: bitcoffer Connected; 4 tools
 ```
 
-或跑 [通用 probe](README.md)。
+Or run the [universal probe](README.md).

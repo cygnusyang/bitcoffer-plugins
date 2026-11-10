@@ -1,10 +1,10 @@
 # Cursor ← Bitcoffer
 
-落点：`~/.cursor/mcp.json`。**只增改 `mcpServers.bitcoffer`，不要整文件覆盖。**
+Drop path: `~/.cursor/mcp.json`. **Only add or update `mcpServers.bitcoffer`; do not overwrite the whole file.**
 
 ## 1) MCP
 
-**方式 A — CLI**
+**Option A — CLI**
 
 ```bash
 BIN="/Applications/Bitcoffer.app/Contents/Helpers/bitcoffer.app/Contents/MacOS/bitcoffer"
@@ -12,11 +12,11 @@ VAULT="$HOME/.bitcoffer/vaults/<your-uuid>"
 cursor --add-mcp "$(python3 -c "import json,os; print(json.dumps({"name":"bitcoffer","command":os.environ["BIN"],"args":["mcp","--provider","bitcoffer"],"env":{"BITCOFFER_VAULT_DIR":os.environ["VAULT"]}}))" )"
 ```
 
-（先 `export BIN=... VAULT=...`。）
+(First `export BIN=... VAULT=...`.)
 
-**方式 B — 合并写入（推荐）**
+**Option B — merge write (recommended)**
 
-把下面保存为 `/tmp/add-bitcoffer-cursor-mcp.py` 后执行 `BITCOFFER_VAULT_DIR=... python3 /tmp/add-bitcoffer-cursor-mcp.py`：
+Save the following as `/tmp/add-bitcoffer-cursor-mcp.py`, then run `BITCOFFER_VAULT_DIR=... python3 /tmp/add-bitcoffer-cursor-mcp.py`:
 
 ```python
 import json, pathlib, os
@@ -35,10 +35,10 @@ path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + chr(10))
 print("wrote", path)
 ```
 
-## 2) 规则
+## 2) Rules
 
-`AGENTS.md` 或 `.cursor/rules/bitcoffer.mdc` 追加 [rules.md](rules.md)。
+Append [rules.md](rules.md) to `AGENTS.md` or `.cursor/rules/bitcoffer.mdc`.
 
-## 3) 验收
+## 3) Acceptance
 
-Cursor Settings → MCP：`bitcoffer` 已连接（4 tools）；或跑 [通用 probe](README.md)。
+Cursor Settings → MCP: `bitcoffer` is connected (4 tools); or run the [universal probe](README.md).

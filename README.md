@@ -13,7 +13,7 @@ Shared skills live in [`skills/`](skills/). The browser-login helper is [`script
 ### Prerequisites
 
 1. **macOS** with the Bitcoffer app installed in `/Applications`.
-2. Unlock the Bitcoffer app **once** on this machine so the Keychain escrow exists (Settings → MCP / Agent 协作 → enable "MCP 解锁托管"). This is per-machine; redo on every new Mac.
+2. Unlock the Bitcoffer app **once** on this machine so the Keychain escrow exists (Settings → MCP / Agent 协作 (*MCP / Agent collaboration*) → enable "MCP 解锁托管" (*MCP unlock escrow*)). This is per-machine; redo on every new Mac.
 3. *(Only for browser logins via `bitcoffer-login`)* — `npm i -g playwright && npx playwright install chromium`.
 
 ### What's inside

@@ -1,14 +1,14 @@
-# Bitcoffer 规则片段（粘贴进宿主规则文件）
+# Bitcoffer rules snippet (paste into the host's rules file)
 
-核心纪律：**Use Secret, not Read Secret**——密钥只经 `run_with_secret` 注入子进程环境，永不进入模型上下文。
+Core rule: **Use Secret, not Read Secret** — secrets are injected into a subprocess environment only via `run_with_secret`, and must never enter the model context.
 
 ```markdown
-## Bitcoffer 凭据
+## Bitcoffer credentials
 
-- 需要密码 / API key / token 时，先用 `list_secret_names`（或 `list_secrets`）确认准确名字。
-- **只用 `run_with_secret`** 把值注入子进程环境（`env_name`）；不要用任何工具「读取」密钥值。
-- **禁止**在命令里 echo / printenv 等会把值打到 stdout/stderr 的写法——那会回流进上下文。
-- 子进程只输出成功/失败/收据，不输出密钥本身。
-- `get_secret_metadata` 只读元数据（可含用户名），不含密钥值。
-- 库里没有该凭据时问用户，禁止猜值或编造。
+- When you need a password / API key / token, first use `list_secret_names` (or `list_secrets`) to confirm the exact name.
+- **Only use `run_with_secret`** to inject the value into the subprocess environment (`env_name`); do not use any tool to "read" a secret value.
+- **Do not** echo / printenv (or any other form that prints the value to stdout/stderr) in the command — that would flow back into the context.
+- The subprocess should only print success / failure / a receipt, never the secret itself.
+- `get_secret_metadata` returns read-only metadata (it may include a username) and does not include the secret value.
+- If the vault does not have that credential, ask the user; do not guess or invent a value.
 ```
