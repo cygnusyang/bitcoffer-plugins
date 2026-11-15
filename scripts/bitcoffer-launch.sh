@@ -8,7 +8,7 @@
 #
 # Resolution order:
 #   binary:  $BITCOFFER_BIN → App helper under /Applications → bitcoffer on PATH (warn)
-#   vault:   $BITCOFFER_VAULT_DIR → newest vault dir under the app container
+#   vault:   $BITCOFFER_VAULT_DIR → active-vault pointer → newest vault dir under ~/.bitcoffer/vaults
 #
 # Any extra argv is forwarded to `bitcoffer mcp` unchanged.
 
@@ -28,11 +28,20 @@ else
 fi
 
 # --- 2. resolve the vault -----------------------------------------------------
+# Canonical vault root is <home>/.bitcoffer/vaults (same as the app). Prefer the
+# active-vault pointer, then the newest vault dir; $BITCOFFER_VAULT_DIR always wins.
 if [ -z "${BITCOFFER_VAULT_DIR:-}" ]; then
-  CONTAINER="$HOME/Library/Containers/app.coffer.Coffer/Data/Documents/Bitcoffer"
-  VAULT="$(ls -dt "$CONTAINER"/*/ 2>/dev/null | head -n 1)"
+  ROOT="$HOME/.bitcoffer/vaults"
+  VAULT=""
+  if [ -f "$ROOT/active-vault" ]; then
+    ACTIVE="$(tr -d '[:space:]' < "$ROOT/active-vault")"
+    [ -n "$ACTIVE" ] && [ -d "$ROOT/$ACTIVE" ] && VAULT="$ROOT/$ACTIVE"
+  fi
   if [ -z "$VAULT" ]; then
-    echo "[bitcoffer-launch] no vault found under $CONTAINER. Unlock the Bitcoffer app once on this machine, or set BITCOFFER_VAULT_DIR." >&2
+    VAULT="$(ls -dt "$ROOT"/*/ 2>/dev/null | head -n 1)"
+  fi
+  if [ -z "$VAULT" ]; then
+    echo "[bitcoffer-launch] no vault found under $ROOT. Unlock the Bitcoffer app once on this machine, or set BITCOFFER_VAULT_DIR." >&2
     exit 1
   fi
   export BITCOFFER_VAULT_DIR="${VAULT%/}"
