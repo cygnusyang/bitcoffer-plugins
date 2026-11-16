@@ -8,6 +8,8 @@
 
 ## [未发布]
 
+## [0.1.1] — 2026-11-16
+
 ### 修复
 
 - `scripts/bitcoffer-login.mjs` —— `--smoke` 与 `--no-submit` 现在在必需字段无法定位/填充时会报告失败（`fields-missing` / `fill-incomplete`），不再无条件宣称成功。
@@ -45,5 +47,6 @@
 - **协议由专有改为 [MIT](LICENSE)。** 允许使用、修改、再分发与销售，条件是保留版权声明与协议正文。协议只覆盖本仓库；应用本体仍为专有。
 - 仓库定位与标签改为 MCP server，不再作为应用镜像。
 
-[未发布]: https://github.com/cygnusyang/bitcoffer-plugins/compare/v0.1.0...HEAD
+[未发布]: https://github.com/cygnusyang/bitcoffer-plugins/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/cygnusyang/bitcoffer-plugins/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/cygnusyang/bitcoffer-plugins/releases/tag/v0.1.0

@@ -8,6 +8,8 @@ This repository versions the **launcher, skills and host configs**. It does not 
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-11-16
+
 ### Fixed
 
 - `scripts/bitcoffer-login.mjs` — `--smoke` and `--no-submit` runs now report failure (`fields-missing` / `fill-incomplete`) when the required fields cannot be located or filled, instead of claiming success unconditionally.
@@ -45,5 +47,6 @@ First tagged release. Pre-1.0: paths and skill wording may change between minor 
 - **Relicensed from proprietary to [MIT](LICENSE).** Use, modification, redistribution and resale are permitted provided the copyright notice and licence text are kept. The licence covers this repository only; the application stays proprietary.
 - Repository is described and tagged as an MCP server, not as an app mirror.
 
-[Unreleased]: https://github.com/cygnusyang/bitcoffer-plugins/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/cygnusyang/bitcoffer-plugins/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/cygnusyang/bitcoffer-plugins/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/cygnusyang/bitcoffer-plugins/releases/tag/v0.1.0
