@@ -20,17 +20,26 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq shellcheck
-          shellcheck -s sh scripts/bitcoffer-launch.sh
+          shellcheck -s sh scripts/bitcoffer-launch.sh scripts/bitcoffer-login
       - name: node --check
+        run: node --check scripts/bitcoffer-login.mjs
+      - name: launcher and shim are executable
         run: |
-          node --check scripts/bitcoffer-login.mjs
-          # The PATH shim has no extension (that is the point — it must be
-          # callable as `bitcoffer-login`), so node would parse it as CJS.
-          # Check it through a temporary .mjs copy instead.
-          cp scripts/bitcoffer-login /tmp/bitcoffer-login-shim.mjs
-          node --check /tmp/bitcoffer-login-shim.mjs
-      - name: launcher is executable
-        run: test -x scripts/bitcoffer-launch.sh
+          test -x scripts/bitcoffer-launch.sh
+          test -x scripts/bitcoffer-login
+
+  test:
+    name: Behavioural tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: launcher resolution tests
+        run: sh tests/launcher.test.sh
+      - name: login helper unit tests
+        run: node --test tests/login.test.mjs
 
   docs:
     name: Docs
