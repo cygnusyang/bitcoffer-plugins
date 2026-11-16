@@ -6,7 +6,7 @@
 
 Bitcoffer 是集中托管密码与密钥的本地网关（数据不离开本机）。本技能说明如何通过这些由本机 Bitcoffer App 提供的 MCP 工具使用凭据——**核心规则是「用密钥，不读密钥」**：凭据值只注入子进程环境，绝不进入模型上下文。
 
-下载：https://ai.cygnusyang.top/bitcoffer/
+下载：<https://ai.cygnusyang.top/bitcoffer/>
 
 ## 何时使用
 
@@ -23,7 +23,7 @@ Bitcoffer 是集中托管密码与密钥的本地网关（数据不离开本机�
 ## 可用工具（精确 schema）
 
 | 工具 | 参数 | 返回 |
-|---|---|---|
+| --- | --- | --- |
 | `list_secret_names` | `{ vault? }` | 全部密钥名称（**绝不返回值**） |
 | `list_secrets` | `{ vault? }` | 密钥元数据（name、id、category、updated_at；**绝不返回值**） |
 | `run_with_secret` | `{ secret(必填), cmd(必填), args[], cwd?, env_name? }` | 把密钥注入子进程环境并执行命令；**绝不返回值** |
@@ -78,6 +78,52 @@ run_with_secret {
 ### 5. 库里没有这条密钥 → 问用户
 
 `list_secret_names` 找不到该凭据时，**不要猜值、不要编造**。问用户这条凭据在哪（可能在别处，也可能是一次性人工流程）。
+
+## 实例
+
+四种形态够覆盖绝大多数情况。注意每一个例子里的值都不出现在 `args` 中——它走 `env_name`，由子进程自己从环境变量读。
+
+**命令行自带 token 变量的**（`gh`、`npm`、`psql`、配了包装的 `curl`）：
+
+```
+run_with_secret { secret: "github-token", cmd: "gh",
+                  args: ["auth", "status"], env_name: "GH_TOKEN" }
+```
+
+```
+run_with_secret { secret: "npm-publish-token", cmd: "npm",
+                  args: ["publish", "--access", "public"], env_name: "NPM_TOKEN" }
+```
+
+（当 `.npmrc` 里有 `//registry.npmjs.org/:_authToken=${NPM_TOKEN}` 时，`npm` 会读 `NPM_TOKEN`。）
+
+```
+run_with_secret { secret: "prod-db", cmd: "psql",
+                  args: ["-h", "db.example.com", "-U", "app", "-d", "main", "-c", "select 1"],
+                  env_name: "PGPASSWORD" }
+```
+
+**只接受命令行参数的旧工具。** 优先找读环境变量的包装。实在没有，就在 `sh -c` 里展开——但要清楚代价：值会落进孙进程的 argv，`ps` 能看到。它仍然没有进入模型上下文，这才是本设计要守的那条线：
+
+```
+run_with_secret { secret: "legacy-api", cmd: "sh",
+                  args: ["-c", "legacy-cli --api-key \"$API_KEY\" sync"],
+                  env_name: "API_KEY" }
+```
+
+**一条命令用多个密钥。** 每个密钥调一次 `run_with_secret`，或写一个只需要一个密钥的包装；工具每次调用只注入一个变量。
+
+**网页登录。** 见上面第 3 步。
+
+## 排障
+
+| 症状 | 原因 | 处理 |
+| --- | --- | --- |
+| `secret not found` / 结果为空 | 库里存的名字和你想的不一样（中文名、带域名后缀） | 先调 `list_secret_names`，照抄那个名字 |
+| `cmd` 报 `command not found` | 宿主启动 server 时 `PATH` 很窄（GUI 应用不继承你 shell 的 profile） | 用绝对路径：`/usr/local/bin/gh`、`/opt/homebrew/bin/npm` |
+| 子进程跑起来了但变量为空 | `env_name` 和子进程读的名字不一致 | 传工具真正认的名字（`GH_TOKEN`、`PGPASSWORD`……） |
+| 解锁失败 / 钥匙串报错 | 库未解锁、托管未开启，或用了裸 `bitcoffer` | 走 `bitcoffer-setup` 技能；用 launcher，别用 `PATH` |
+| 命令能跑，但值被写到了某处 | 工具自身在报错时打印了配置 | 检查工具的详细输出开关；携带密钥的调用绝不开 `-v`/`--debug` |
 
 ## 反模式（禁止）
 

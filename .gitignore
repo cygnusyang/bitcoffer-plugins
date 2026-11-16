@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+._*
+__MACOSX/
+
+# Node (the login helper may be run from a checkout)
+node_modules/
+npm-debug.log*
+
+# Local overrides / throwaway configs
+.env
+.env.*
+*.local
+*.log
+
+# Never commit a vault, a key or a credential dump
+vaults/
+*.vault
+*.p12
+*.pem
+*.key

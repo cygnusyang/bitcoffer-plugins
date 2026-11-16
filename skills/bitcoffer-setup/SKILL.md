@@ -9,7 +9,7 @@ description: Diagnose and repair the Bitcoffer MCP connection — run when Bitco
 
 Use this skill when Bitcoffer MCP tools are missing, the server fails to connect, or you are using bitcoffer for the first time on a new machine. Work through the checks in order; that is the fastest way to hit the root cause.
 
-Download: https://ai.cygnusyang.top/bitcoffer/
+Download: <https://ai.cygnusyang.top/bitcoffer/>
 
 ## Diagnostic order
 
@@ -21,7 +21,7 @@ Download: https://ai.cygnusyang.top/bitcoffer/
 test -x /Applications/Bitcoffer.app/Contents/Helpers/bitcoffer.app/Contents/MacOS/bitcoffer && echo OK || echo MISSING
 ```
 
-If missing → tell the user to install the Bitcoffer App from https://ai.cygnusyang.top/bitcoffer/, then come back.
+If missing → tell the user to install the Bitcoffer App from <https://ai.cygnusyang.top/bitcoffer/>, then come back.
 
 **b. A vault already exists**:
 
@@ -45,6 +45,20 @@ Prefer pointing the host's MCP `command` at the shared script `scripts/bitcoffer
 - `BITCOFFER_VAULT_DIR` — set a specific vault directory
 
 bitcoffer must run from the in-App path; a bare binary on PATH may fail because of signing / Keychain context.
+
+## Symptom → first check
+
+Most reports collapse into one of these. Go straight to the row that matches, then fall back to the ordered checks above.
+
+| Symptom | Most likely cause | First check |
+| --- | --- | --- |
+| No `bitcoffer` tools in the host at all | server never registered, or the host needs a restart / trust click | is the entry in the host's config file? did you restart the host? |
+| Server listed as failed, exits immediately | launcher cannot find a binary | run the launcher by hand; it prints every path it checked |
+| Server connects, zero tools | launcher exited before `exec` | launcher stderr — usually a vault problem, not a binary problem |
+| `list_secret_names` returns `[]` on a vault you know has items | escrow not enabled, or the wrong vault was picked | app Settings → MCP / Agent collaboration; then `ls ~/.bitcoffer/vaults/` |
+| `keychain` / `-25308` / AMFI error | a bare `bitcoffer` from `PATH`, or the binary lives in a different container than the vault | point `command` at the launcher or the in-app helper |
+| Worked yesterday, broken today | the app was updated or replaced; the escrow entry no longer matches | unlock the app once again, then reconnect |
+| Works in a terminal, fails inside the host | the host was launched from a GUI context with no keychain access | unlock the app while logged into the desktop session, then restart the host |
 
 ## Done when
 

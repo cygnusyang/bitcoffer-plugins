@@ -16,4 +16,4 @@ Shared tools used with these skills:
 - [`scripts/bitcoffer-launch.sh`](../scripts/bitcoffer-launch.sh) — resolve the app-signed binary and the local vault, then start the MCP server
 - [`scripts/bitcoffer-login`](../scripts/bitcoffer-login) — browser-login driver; the password arrives only via an env var from `run_with_secret`
 
-Download the Bitcoffer app: https://ai.cygnusyang.top/bitcoffer/
+Download the Bitcoffer app: <https://ai.cygnusyang.top/bitcoffer/>

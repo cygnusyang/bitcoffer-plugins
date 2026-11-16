@@ -1,0 +1,85 @@
+name: Bug report
+description: Something in the launcher, a skill, or a host config does not work
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        English or 简体中文, either is fine.
+        **Do not paste a secret value, a vault path, or a licence key.** Redact them first.
+        If this is a security issue (a secret reached the model context, a log, or shell history), stop and follow [SECURITY.md](../SECURITY.md) instead of opening an issue.
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - scripts/bitcoffer-launch.sh
+        - scripts/bitcoffer-login
+        - skills/bitcoffer-credentials
+        - skills/bitcoffer-setup
+        - docs/agents (a host paste pack)
+        - The Bitcoffer app itself
+    validations:
+      required: true
+
+  - type: input
+    id: host
+    attributes:
+      label: MCP host and version
+      placeholder: Claude Code 2.x / Cursor 0.4x / Codex 0.x / WorkBuddy / other
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Repository tag or commit, and the Bitcoffer app version if relevant
+      placeholder: repo v0.1.0, app 2.23.0
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: macOS version and chip
+      placeholder: macOS 15.2, Apple silicon
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: Paste the error output. If it is the launcher, include the full "no usable bitcoffer CLI found. Checked:" block — it names every path it tried.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Before submitting
+      options:
+        - label: I removed every secret value, real token and machine-specific path from this report.
+          required: true
+        - label: I searched existing issues for the same problem.
+          required: true

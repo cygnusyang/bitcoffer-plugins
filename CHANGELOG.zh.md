@@ -1,0 +1,32 @@
+# 更新日志
+
+[English](CHANGELOG.md) | **简体中文**
+
+本仓库所有值得记录的改动都写在这里。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本号遵循[语义化版本](https://semver.org/lang/zh-CN/)。
+
+本仓库的版本描述的是 **launcher、skill 与宿主配置**。它不跟随 Bitcoffer 应用的版本：App 发版不代表这里有改动，反之亦然。
+
+## [未发布]
+
+## [0.1.0] — 2026-11-16
+
+首个打 tag 的版本。处于 1.0 之前：路径与 skill 措辞可能在小版本之间变化。
+
+### 新增
+
+- `scripts/bitcoffer-launch.sh` —— 零配置 MCP 入口。连接时解析 App 签名的二进制（`$BITCOFFER_BIN` → App 内置助手 → 独立 CLI → `PATH`）与库目录（`$BITCOFFER_VAULT_DIR` → `active-vault` 指针 → 最新库），然后 `exec bitcoffer mcp`。失败时列出所有检查过的路径，并说明 App Store 构建不含内置助手的情况。
+- `scripts/bitcoffer-login` + `scripts/bitcoffer-login.mjs` —— 浏览器登录驱动。密码经环境变量传入（来自 `run_with_secret`），不经 argv 也不经 stdout；只打印 JSON 回执。
+- `skills/bitcoffer-credentials` —— 如何用密钥而不读密钥：查名字、注入子进程环境、绝不 `echo`/`printenv`。
+- `skills/bitcoffer-setup` —— 连接缺失或损坏时的顺序诊断：App 是否安装、库是否存在、钥匙串托管是否建立、launcher 覆盖项。
+- `docs/agents/` —— Claude Code、Cursor、Codex、WorkBuddy 的即贴配置包，共用规则片段，以及一个期望恰好 4 个工具的通用 `tools/list` 探针。
+- 双语文档：每篇均为英文原文 + 完整简体中文对照（`*.zh.md`），顶部互链。
+- `SECURITY.md`：四条设计不变量、明确的威胁模型、私密报告渠道。
+- `CONTRIBUTING.md`、`CHANGELOG.md`、`.gitignore`、issue 与 pull request 模板。
+
+### 变更
+
+- **协议由专有改为 [MIT](LICENSE)。** 允许使用、修改、再分发与销售，条件是保留版权声明与协议正文。协议只覆盖本仓库；应用本体仍为专有。
+- 仓库定位与标签改为 MCP server，不再作为应用镜像。
+
+[未发布]: https://github.com/cygnusyang/bitcoffer-plugins/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/cygnusyang/bitcoffer-plugins/releases/tag/v0.1.0

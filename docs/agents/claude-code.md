@@ -2,29 +2,33 @@
 
 **English** | [简体中文](claude-code.zh.md)
 
-Same as the other hosts: point MCP config at the shared launch script [`scripts/bitcoffer-launch.sh`](../../scripts/bitcoffer-launch.sh), and use the rules in [rules.md](rules.md). Shared skills live at the repo root under [`skills/`](../../skills/).
+Goal: `claude mcp list` shows `bitcoffer` connected with **4** tools. Rules go in `CLAUDE.md`, shared skills live under [`skills/`](../../skills/).
 
-## 1) MCP
+## 1) MCP — launcher (preferred)
 
-`scripts/bitcoffer-launch.sh` resolves the App-signed binary and the local vault on connect (override with `BITCOFFER_VAULT_DIR` / `BITCOFFER_BIN`). Replace the path with the script location after you clone or copy this repo:
+The launcher resolves the App-signed binary and the vault on every connect, so nothing machine-specific enters the config:
 
 ```bash
-claude mcp add --scope user bitcoffer -- /path/to/bitcoffer/scripts/bitcoffer-launch.sh
+claude mcp add --scope user bitcoffer -- ~/.bitcoffer/bitcoffer-launch.sh
 ```
 
-Or a project-level `.mcp.json` (replace the path with a real value):
+Use `--scope project` instead of `user` to commit this to `.mcp.json` for a repository. If you work from a clone rather than the README install step, point at `scripts/bitcoffer-launch.sh` in the clone.
+
+Project-level `.mcp.json` equivalent:
 
 ```json
 {
   "mcpServers": {
     "bitcoffer": {
-      "command": "/path/to/bitcoffer/scripts/bitcoffer-launch.sh"
+      "command": "/Users/you/.bitcoffer/bitcoffer-launch.sh"
     }
   }
 }
 ```
 
-You can also register the helper binary directly and pass the vault directory explicitly:
+## 2) MCP — explicit binary and vault (fallback)
+
+Register the helper directly and pass the vault yourself. Use this when auto-detection picks the wrong vault, or when you keep several vaults:
 
 ```bash
 BIN="/Applications/Bitcoffer.app/Contents/Helpers/bitcoffer.app/Contents/MacOS/bitcoffer"
@@ -35,15 +39,34 @@ claude mcp add --scope user bitcoffer \
   -- "$BIN" mcp --provider bitcoffer
 ```
 
-## 2) Rules
+App Store and TestFlight builds bundle no helper under `Contents/Helpers`; on those, install the standalone CLI and use `~/.bitcoffer/libexec/bitcoffer.app/Contents/MacOS/bitcoffer` instead.
 
-Append [rules.md](rules.md) to `CLAUDE.md` at the project root.
+## 3) Rules
 
-## 3) Acceptance
+Append [rules.md](rules.md) to `CLAUDE.md` at the project root. This is what stops Claude from trying to `echo` a secret "just to check".
+
+## 4) Acceptance
 
 ```bash
 claude mcp list
 # expect: bitcoffer Connected; 4 tools
 ```
 
-Or run the [universal probe](README.md).
+Or run the [universal probe](README.md#universal-smoke-test-toolslist--4), which needs no host at all.
+
+## 5) Uninstall
+
+```bash
+claude mcp remove bitcoffer --scope user
+```
+
+Also remove the appended block from `CLAUDE.md`. The launcher script and the app are independent of this registration — leaving them is fine.
+
+## 6) Troubleshooting
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| `bitcoffer` listed but no tools | launcher exited non-zero during connect | run `~/.bitcoffer/bitcoffer-launch.sh` in a terminal and read the path list it prints |
+| Connected, `list_secret_names` returns `[]` | escrow not enabled, or the wrong vault | Settings → MCP / Agent collaboration → enable MCP unlock escrow; or set `BITCOFFER_VAULT_DIR` |
+| Unlock error mentioning the keychain | a bare `bitcoffer` from `PATH` was used | remove the PATH binary from the config; use the launcher |
+| Works in terminal, fails in Claude Code | GUI launch context lacks the keychain item | unlock the app once while logged into the desktop session, then reconnect |

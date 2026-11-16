@@ -1,0 +1,40 @@
+name: Host support request
+description: Ask for a paste pack for an MCP host that is not covered yet
+labels: [host-request]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        English or 简体中文, either is fine.
+        Covered today: Claude Code, Cursor, Codex, WorkBuddy. Anything else that speaks MCP over stdio should work with the launcher — this form is about shipping a documented paste pack, not about whether it is possible.
+
+  - type: input
+    id: host
+    attributes:
+      label: Host name and version
+    validations:
+      required: true
+
+  - type: input
+    id: config
+    attributes:
+      label: Where does it read MCP config from?
+      description: Exact file path or command, e.g. `~/.example/config.json` or `example mcp add`
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What you already tried
+      description: If the generic `mcpServers` block works as-is, say so — that turns this into a docs-only change.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: windows
+    attributes:
+      label: Platform
+      options:
+        - label: This host runs on macOS (the launcher is macOS-only; the Bitcoffer app is macOS-only).
+          required: true

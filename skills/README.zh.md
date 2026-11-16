@@ -16,4 +16,4 @@
 - [`scripts/bitcoffer-launch.sh`](../scripts/bitcoffer-launch.sh) —— 解析 App 内签名二进制与本机库，然后启动 MCP 服务
 - [`scripts/bitcoffer-login`](../scripts/bitcoffer-login) —— 浏览器登录驱动；口令只经 `run_with_secret` 以环境变量传入
 
-下载 Bitcoffer 应用：https://ai.cygnusyang.top/bitcoffer/
+下载 Bitcoffer 应用：<https://ai.cygnusyang.top/bitcoffer/>

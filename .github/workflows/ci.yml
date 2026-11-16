@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  shell:
+    name: Shell and JS syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: shellcheck
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq shellcheck
+          shellcheck -s sh scripts/bitcoffer-launch.sh scripts/bitcoffer-login
+      - name: node --check
+        run: node --check scripts/bitcoffer-login.mjs
+      - name: launcher is executable
+        run: test -x scripts/bitcoffer-launch.sh
+
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: markdownlint
+        run: npx --yes markdownlint-cli2 "**/*.md" "#node_modules"
+      - name: relative links resolve
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, sys
+
+          def strip_code(text):
+              text = re.sub(r"```.*?```", "", text, flags=re.S)
+              return re.sub(r"`[^`\n]*`", "", text)
+
+          bad = []
+          for md in pathlib.Path(".").rglob("*.md"):
+              if ".git" in md.parts or "node_modules" in md.parts:
+                  continue
+              body = strip_code(md.read_text(encoding="utf-8"))
+              for m in re.finditer(r"\]\(([^)\s]+)", body):
+                  target = m.group(1)
+                  if target.startswith(("http://", "https://", "mailto:", "#")):
+                      continue
+                  path_part = target.split("#", 1)[0]
+                  if path_part and not (md.parent / path_part).resolve().exists():
+                      bad.append(f"{md}: {target}")
+          print(f"relative links checked, {len(bad)} broken")
+          for b in bad:
+              print(" ", b)
+          sys.exit(1 if bad else 0)
+          PY
+
+  bilingual:
+    name: Bilingual parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: counterparts exist
+        run: |
+          python3 - <<'PY'
+          import pathlib, sys
+
+          # LICENSE.zh.md pairs with LICENSE (no .md), so it has no .md counterpart.
+          exempt_orphans = {"LICENSE.zh.md"}
+          missing, orphans = [], []
+          for md in pathlib.Path(".").rglob("*.md"):
+              parts = set(md.parts)
+              if parts & {".git", "node_modules", ".github"}:
+                  continue
+              if md.name.endswith(".zh.md"):
+                  en = md.with_name(md.name[: -len(".zh.md")] + ".md")
+                  if not en.exists() and md.name not in exempt_orphans:
+                      orphans.append(str(md))
+                  continue
+              if not md.with_name(md.stem + ".zh.md").exists():
+                  missing.append(str(md))
+          for m in missing:
+              print("missing zh counterpart:", m)
+          for o in orphans:
+              print("orphan zh file:", o)
+          sys.exit(1 if missing or orphans else 0)
+          PY
+      - name: each pair links to the other
+        run: |
+          python3 - <<'PY'
+          import pathlib, sys
+
+          bad = []
+          for zh in pathlib.Path(".").rglob("*.zh.md"):
+              if ".git" in zh.parts:
+                  continue
+              en = zh.with_name(zh.name[: -len(".zh.md")] + ".md")
+              if not en.exists():
+                  continue
+              zh_text = zh.read_text(encoding="utf-8")
+              en_text = en.read_text(encoding="utf-8")
+              if en.name not in zh_text:
+                  bad.append(f"{zh}: no link back to {en.name}")
+              if zh.name not in en_text:
+                  bad.append(f"{en}: no link to {zh.name}")
+          for b in bad:
+              print(b)
+          sys.exit(1 if bad else 0)
+          PY
+
+  no-local-paths:
+    name: No machine-specific paths
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: scan tracked files
+        run: |
+          set -e
+          hits="$(git grep -nE '/Users/[A-Za-z0-9._-]+' -- . || true)"
+          bad="$(printf '%s\n' "$hits" | grep -v '/Users/you' | grep -v '^$' || true)"
+          if [ -n "$bad" ]; then
+            printf '%s\n' "$bad"
+            echo "::error::real home directory committed — use /Users/you/ or \$HOME/"
+            exit 1
+          fi
+          if git grep -nE '(~/|[$]HOME/)work/' -- . ; then
+            echo "::error::local working tree path committed"
+            exit 1
+          fi
+          if git grep -nE '(~/|[$]HOME/)(Projects|code|src)/[A-Za-z0-9._-]+' -- . ; then
+            echo "::error::local working tree path committed"
+            exit 1
+          fi
+          echo "clean"
