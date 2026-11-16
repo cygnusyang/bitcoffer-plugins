@@ -14,9 +14,8 @@
 // Usage via run_with_secret:
 //   run_with_secret {
 //     secret: "<bitcoffer secret name>",
-//     cmd: "node",
-//     args: ["bitcoffer-login",
-//            "--url", "https://community.obsidian.md/",
+//     cmd: "bitcoffer-login",
+//     args: ["--url", "https://community.obsidian.md/",
 //            "--email", "you@example.com",
 //            "--password-env", "PASSWORD",
 //            "--open", ".login-button",
@@ -26,15 +25,19 @@
 //
 // Success signals (any one, polled): --success-selector (CSS), --success-text
 // (substring of body), --success-url (RegExp on the final URL). Failure signals:
-// --error-selector (CSS, checked each poll). If none fire within
-// --success-wait-ms the run reports a timeout — the human should check the
-// window (2FA/captcha may be pending), it does NOT mean the login failed.
+// --error-selector (CSS, checked each poll). If you provide NO success signal,
+// the run submits and then reports "submitted-unconfirmed" — the login is not
+// judged to have succeeded or failed. If a success signal is provided but none
+// fires within --success-wait-ms the run reports "timeout" — the human should
+// check the window (2FA/captcha may be pending), it does NOT mean the login
+// failed.
 
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 const require = createRequire(import.meta.url);
@@ -64,15 +67,21 @@ function loadPlaywright(a) {
 }
 
 // --- arg parsing -----------------------------------------------------------
+// Accepts both `--flag value` and `--flag=value`; a bare `--flag` is boolean.
 function parseArgs(argv) {
   const a = {};
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     if (!k.startsWith('--')) continue;
-    const name = k.slice(2);
+    const body = k.slice(2);
+    const eq = body.indexOf('=');
+    if (eq !== -1) {
+      a[body.slice(0, eq)] = body.slice(eq + 1);
+      continue;
+    }
     const next = argv[i + 1];
-    if (next === undefined || next.startsWith('--')) { a[name] = true; continue; }
-    a[name] = next; i++;
+    if (next === undefined || next.startsWith('--')) { a[body] = true; continue; }
+    a[body] = next; i++;
   }
   return a;
 }
@@ -91,11 +100,18 @@ function usage() {
     '  --headless                 run headless (default: headed, so a human can watch / do 2FA)',
     '  --no-submit                fill but do not click submit',
     '  --smoke                    locate fields only, never fill or submit (no password needed)',
-    '  --success-selector <css>   success signal',
+    '  --close                    close the browser after the run (default: keep it open for 2FA)',
+    '  --success-selector <css>   success signal (any one)',
     '  --success-text <text>      success signal (substring of body text)',
     '  --success-url <regex>      success signal (matched against final URL)',
-    '  --error-selector <css>     default ".alert-error, #login-error"',
-    '  --success-wait-ms <ms>     default 15000',
+    '  --error-selector <css>     default ".alert-error, #login-error, .login-error"',
+    '  --success-wait-ms <ms>     how long to poll for a success signal, default 15000',
+    '  --op-timeout-ms <ms>       timeout for a single DOM operation, default 5000',
+    '  --goto-timeout-ms <ms>     navigation timeout, default 30000',
+    '  --help                     show this help',
+    '',
+    'Without any success signal the run reports "submitted-unconfirmed" after',
+    'submitting: the login is neither confirmed nor ruled out.',
   ].join('\n');
 }
 
@@ -105,23 +121,53 @@ const DEFAULTS = {
   submitSelector: '#login-button',
   errorSelector: '.alert-error, #login-error, .login-error',
   successWaitMs: 15000,
+  opTimeoutMs: 5000,
+  gotoTimeoutMs: 30000,
 };
+
+// --- pure helpers (unit-testable) -----------------------------------------
+
+// Whether the located/filled fields satisfy what this run needs. In smoke mode
+// both fields are required (the point is to verify the selectors); in fill
+// modes the email field is only required when --email was actually given.
+function fieldsSatisfied(a, fields) {
+  const emailRequired = !!a.smoke || !!a.email;
+  const passwordOk = fields.password === true;
+  const emailOk = !emailRequired || fields.email === true;
+  return { ok: passwordOk && emailOk, passwordOk, emailOk, emailRequired };
+}
+
+// Resolve the password from the environment. Smoke runs need none; anything
+// else refuses to continue with a blank password (fail closed, no playwright).
+function resolvePassword(a) {
+  if (a.smoke) return { ok: true, password: '' };
+  const name = a['password-env'];
+  const password = process.env[name] ?? '';
+  if (password === '') {
+    return { ok: false, error: `env var ${name} is empty/unset — refusing to log in with a blank password` };
+  }
+  return { ok: true, password };
+}
 
 // --- run -------------------------------------------------------------------
 async function run() {
   const a = parseArgs(process.argv.slice(2));
+  if (a.help) {
+    console.log(usage());
+    process.exit(0);
+  }
   if (!a.url || (!a['password-env'] && !a.smoke)) {
     console.error(usage());
     process.exit(2);
   }
 
-  const playwright = loadPlaywright(a);
-  const pwEnv = a['password-env'];
-  const password = a.smoke ? '' : (process.env[pwEnv] ?? '');
-  if (!a.smoke && password === '') {
-    console.error(`[bitcoffer-login] env var ${pwEnv} is empty/unset — refusing to log in with a blank password`);
+  const pw = resolvePassword(a);
+  if (!pw.ok) {
+    console.error(`[bitcoffer-login] ${pw.error}`);
     process.exit(3);
   }
+
+  const playwright = loadPlaywright(a);
 
   const host = new URL(a.url).hostname;
   const slug = host.replace(/\./g, '-');
@@ -146,33 +192,50 @@ async function run() {
   };
 
   try {
-    page.setDefaultTimeout(Number(a['success-wait-ms']) || DEFAULTS.successWaitMs);
-    const resp = await page.goto(a.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Keep per-operation timeouts independent of the success-poll deadline:
+    // a long --success-wait-ms (slow 2FA) must not make a missing field hang.
+    page.setDefaultTimeout(Number(a['op-timeout-ms']) || DEFAULTS.opTimeoutMs);
+    const resp = await page.goto(a.url, {
+      waitUntil: 'domcontentloaded',
+      timeout: Number(a['goto-timeout-ms']) || DEFAULTS.gotoTimeoutMs,
+    });
     receipt.status = resp ? resp.status() : null;
 
     if (a.open) {
-      try { await page.click(a.open, { timeout: 5000 }); }
+      try { await page.click(a.open); }
       catch { /* form may already be visible — proceed */ }
     }
 
-    // Locate fields.
-    if (!a.smoke && a.email) {
-      const el = await page.$(a['email-selector'] || DEFAULTS.emailSelector);
-      if (el) { await el.fill(a.email); receipt.fields.email = true; }
-    } else if (a.smoke) {
-      receipt.fields.email = !!(await page.$((a['email-selector'] || DEFAULTS.emailSelector)));
-    }
-    if (!a.smoke) {
-      const el = await page.$(a['password-selector'] || DEFAULTS.passwordSelector);
-      if (el) { await el.fill(password); receipt.fields.password = true; }
+    const emailSelector = a['email-selector'] || DEFAULTS.emailSelector;
+    const passwordSelector = a['password-selector'] || DEFAULTS.passwordSelector;
+
+    // Locate fields (smoke) or fill them (filled / login).
+    if (a.smoke) {
+      receipt.fields.email = !!(await page.$(emailSelector));
+      receipt.fields.password = !!(await page.$(passwordSelector));
     } else {
-      receipt.fields.password = !!(await page.$((a['password-selector'] || DEFAULTS.passwordSelector)));
+      if (a.email) {
+        const el = await page.$(emailSelector);
+        if (el) { await el.fill(a.email); receipt.fields.email = true; }
+      }
+      const el = await page.$(passwordSelector);
+      if (el) { await el.fill(pw.password); receipt.fields.password = true; }
+    }
+
+    const fields = fieldsSatisfied(a, receipt.fields);
+    if (!fields.ok) {
+      const missing = [];
+      if (!fields.passwordOk) missing.push('password');
+      if (fields.emailRequired && !fields.emailOk) missing.push('email');
+      receipt.outcome = a.smoke ? 'fields-missing' : 'fill-incomplete';
+      receipt.note = `could not locate the ${missing.join(' and ')} field${missing.length > 1 ? 's' : ''} — nothing was ${a.smoke ? 'verified' : 'submitted'}`;
+      return receipt;
     }
 
     if (a.smoke) {
       receipt.ok = true;
       receipt.outcome = 'fields-located';
-      receipt.note = 'smoke only — no credentials used';
+      receipt.note = 'smoke only — fields located, no credentials used';
       return receipt;
     }
 
@@ -184,10 +247,11 @@ async function run() {
     }
 
     // Submit and poll for a success/failure signal.
-    const submit = await page.$((a['submit-selector'] || DEFAULTS.submitSelector));
+    const submit = await page.$(a['submit-selector'] || DEFAULTS.submitSelector);
     if (!submit) {
       receipt.ok = false;
-      receipt.note = 'submit button not found — nothing clicked';
+      receipt.outcome = 'submit-missing';
+      receipt.note = 'submit button not found — fields filled but nothing clicked';
       return receipt;
     }
     await submit.click();
@@ -197,6 +261,7 @@ async function run() {
     const successUrl = a['success-url'] ? new RegExp(a['success-url']) : null;
     const errorSel = a['error-selector'] || DEFAULTS.errorSelector;
     const waitMs = Number(a['success-wait-ms']) || DEFAULTS.successWaitMs;
+    const hasSuccessSignal = !!(successSel || successText || successUrl);
 
     const deadline = Date.now() + waitMs;
     while (Date.now() < deadline) {
@@ -213,32 +278,41 @@ async function run() {
           receipt.ok = true; receipt.outcome = 'success-text'; break;
         }
       }
-      const errEl = await page.$(errorSel);
-      if (errEl) {
-        const msg = ((await errEl.textContent()) || '').trim().slice(0, 200);
+      if (await page.$(errorSel)) {
         receipt.ok = false;
         receipt.outcome = 'error-signal';
-        receipt.note = `login form reports an error: ${msg} (likely wrong credentials or 2FA)`;
+        receipt.note = 'login form reports an error — likely wrong credentials or a failed 2FA step';
         break;
       }
       await sleep(400);
     }
     if (receipt.outcome === null) {
       receipt.ok = false;
-      receipt.outcome = 'timeout';
-      receipt.note = 'no success/error signal within the wait — check the window (2FA/captcha may be pending)';
+      if (hasSuccessSignal) {
+        receipt.outcome = 'timeout';
+        receipt.note = 'no success/error signal within the wait — check the window (2FA/captcha may be pending)';
+      } else {
+        receipt.outcome = 'submitted-unconfirmed';
+        receipt.note = 'login submitted but no success signal was provided, so the result could not be confirmed — check the window (2FA/captcha may be pending)';
+      }
     }
     receipt.title = await page.title();
     return receipt;
   } finally {
-    // Smoke runs close immediately. Real-login runs keep the browser open:
-    // a headed login may need human 2FA, and the persistent context must be
-    // left alive to save the session cookies.
-    if (a.smoke) await ctx.close();
+    // Smoke runs close immediately. Real runs keep the browser open so a human
+    // can finish 2FA and the persistent profile keeps the session; --close
+    // overrides that for scripted use.
+    if (a.smoke || a.close) await ctx.close();
   }
 }
 
 // --- entry -----------------------------------------------------------------
-run()
-  .then((r) => { console.log(JSON.stringify(r)); process.exit(r.ok ? 0 : 1); })
-  .catch((e) => { console.error('[bitcoffer-login] failed:', e.message); process.exit(1); });
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMain) {
+  run()
+    .then((r) => { console.log(JSON.stringify(r)); process.exit(r.ok ? 0 : 1); })
+    .catch((e) => { console.error('[bitcoffer-login] failed:', e.message); process.exit(1); });
+}
+
+export { parseArgs, fieldsSatisfied, resolvePassword, DEFAULTS };

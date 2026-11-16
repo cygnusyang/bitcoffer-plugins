@@ -1,12 +1,19 @@
-#!/usr/bin/env node
-// PATH shim: when this file (or this directory) is on PATH, skills and hosts
-// can call `bitcoffer-login` without knowing the repo layout.
-// Forwards argv to bitcoffer-login.mjs beside this file.
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+#!/usr/bin/env sh
+# bitcoffer-login — PATH shim that forwards argv to bitcoffer-login.mjs beside
+# this file, so skills and hosts can call `bitcoffer-login` without knowing the
+# repo layout. Symlinks are resolved so it also works when this file (rather
+# than its directory) is linked onto PATH.
 
-const script = path.join(path.dirname(fileURLToPath(import.meta.url)), 'bitcoffer-login.mjs');
-import(script).catch((e) => {
-  console.error('[bitcoffer-login] failed:', e.message);
-  process.exit(1);
-});
+# Resolve any symlink chain to the real script, then use its directory.
+SELF="$0"
+while [ -L "$SELF" ]; do
+  DIR="$(CDPATH='' cd -- "$(dirname -- "$SELF")" && pwd)"
+  TARGET="$(readlink "$SELF")"
+  case "$TARGET" in
+    /*) SELF="$TARGET" ;;
+    *) SELF="$DIR/$TARGET" ;;
+  esac
+done
+DIR="$(CDPATH='' cd -- "$(dirname -- "$SELF")" && pwd)"
+
+exec node "$DIR/bitcoffer-login.mjs" "$@"
