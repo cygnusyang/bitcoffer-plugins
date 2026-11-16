@@ -36,9 +36,11 @@
 
 ```bash
 shellcheck -s sh scripts/bitcoffer-launch.sh
-shellcheck -s sh scripts/bitcoffer-login
 node --check scripts/bitcoffer-login.mjs
+cp scripts/bitcoffer-login /tmp/bitcoffer-login-shim.mjs && node --check /tmp/bitcoffer-login-shim.mjs
 ```
+
+最后一行不是笔误：`scripts/bitcoffer-login` 是一个没有扩展名的 Node ESM 壳（它必须能以 `bitcoffer-login` 的名字出现在 `PATH` 上供调用），所以 `node --check` 会按 CommonJS 解析，撞上里面的 `import` 报错。复制成 `.mjs` 再检查是最省事的做法。
 
 然后手工把解析顺序走一遍——实践中出问题的都是最无聊的几种情况：
 

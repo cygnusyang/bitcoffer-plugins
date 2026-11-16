@@ -36,9 +36,11 @@ No build step, no dependencies for the launcher (POSIX `sh`). Before opening a p
 
 ```bash
 shellcheck -s sh scripts/bitcoffer-launch.sh
-shellcheck -s sh scripts/bitcoffer-login
 node --check scripts/bitcoffer-login.mjs
+cp scripts/bitcoffer-login /tmp/bitcoffer-login-shim.mjs && node --check /tmp/bitcoffer-login-shim.mjs
 ```
+
+The last line is not a typo: `scripts/bitcoffer-login` is a Node ESM shim with no file extension — it has to be callable as `bitcoffer-login` on `PATH` — so `node --check` will parse it as CommonJS and choke on its `import`. Copying it to a `.mjs` name is the cheapest way to syntax-check it.
 
 Then exercise the resolution order by hand — the cases that break in practice are the boring ones:
 

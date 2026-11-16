@@ -73,6 +73,9 @@ if [ -z "${BITCOFFER_VAULT_DIR:-}" ]; then
     [ -n "$ACTIVE" ] && [ -d "$VAULT_ROOT/$ACTIVE" ] && VAULT="$VAULT_ROOT/$ACTIVE"
   fi
   if [ -z "$VAULT" ]; then
+    # Vault directories are UUIDs created by the app, so `ls` is safe here;
+    # a find/xargs dance would be longer and no more correct.
+    # shellcheck disable=SC2012
     VAULT="$(ls -dt "$VAULT_ROOT"/*/ 2>/dev/null | head -n 1)"
   fi
   if [ -z "$VAULT" ]; then
