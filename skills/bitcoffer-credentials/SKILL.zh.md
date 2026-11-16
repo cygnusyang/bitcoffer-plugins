@@ -54,14 +54,13 @@ run_with_secret {
 
 ### 3. 网页登录（浏览器自动化）
 
-如果 `bitcoffer-login` 在 PATH 上（本仓库的 `scripts/bitcoffer-login`），用 `run_with_secret` 以 `node` 为 cmd 启动它。口令通过环境变量注入；helper 填表并复用持久化 profile：
+如果 `bitcoffer-login` 在 PATH 上（本仓库的 `scripts/bitcoffer-login`），用 `run_with_secret` 以这个 shim 为 `cmd` 启动它。口令通过环境变量注入；helper 填表并复用持久化 profile：
 
 ```
 run_with_secret {
   secret: "<口令条目名>",
-  cmd: "node",
-  args: ["bitcoffer-login",
-         "--url", "https://<site>/<login>",
+  cmd: "bitcoffer-login",
+  args: ["--url", "https://<site>/<login>",
          "--email", "<username>",
          "--password-env", "PASSWORD",
          "--smoke"],                       // 先用 --smoke 验证字段能定位，再做真实登录

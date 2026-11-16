@@ -8,6 +8,22 @@ This repository versions the **launcher, skills and host configs**. It does not 
 
 ## [Unreleased]
 
+### Fixed
+
+- `scripts/bitcoffer-login.mjs` — `--smoke` and `--no-submit` runs now report failure (`fields-missing` / `fill-incomplete`) when the required fields cannot be located or filled, instead of claiming success unconditionally.
+- `scripts/bitcoffer-login.mjs` — a login with no success signal now reports `submitted-unconfirmed` instead of a misleading `timeout`; per-operation timeouts are split from the success-poll deadline (`--op-timeout-ms`, `--goto-timeout-ms`).
+- `scripts/bitcoffer-login.mjs` — the page's error text is no longer copied into the receipt; `--flag=value` is accepted; `--help` exits 0; `--close` closes the browser after the run.
+- `scripts/bitcoffer-launch.sh` — `$BITCOFFER_BIN` is checked for executability and fails loudly, and the `active-vault` pointer rejects path separators/traversal instead of trusting it as a bare name.
+- `README.md` — `run_with_secret` injects a single secret value, matching the skill and schema.
+
+### Changed
+
+- `scripts/bitcoffer-login` is now a small `sh` shim that forwards argv to `bitcoffer-login.mjs`; the `.mjs` file is the single source that is syntax-checked.
+
+### Added
+
+- `tests/` — behavioural tests for the launcher's resolution order and fail-closed behaviour, plus unit tests for the login helper's argument parsing and field/password helpers.
+
 ## [0.1.0] — 2026-11-16
 
 First tagged release. Pre-1.0: paths and skill wording may change between minor versions.

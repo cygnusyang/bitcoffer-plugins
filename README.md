@@ -46,7 +46,7 @@ The server exposes **4 tools** over MCP:
 | `list_secret_names` | List the names of stored secrets (no values) |
 | `list_secrets` | List secret names + metadata (no values) |
 | `get_secret_metadata` | Read one secret's metadata, including the stored login username (no values) |
-| `run_with_secret` | Run a command with one or more secret values injected into its environment |
+| `run_with_secret` | Run a command with a secret value injected into its environment |
 
 Values are **never returned** by any tool. A secret reaches a subprocess only through its environment, and only for a command you explicitly asked to run.
 

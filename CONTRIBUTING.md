@@ -35,12 +35,13 @@ English is the source of truth and the file a model loads. Every document also s
 No build step, no dependencies for the launcher (POSIX `sh`). Before opening a pull request:
 
 ```bash
-shellcheck -s sh scripts/bitcoffer-launch.sh
+shellcheck -s sh scripts/bitcoffer-launch.sh scripts/bitcoffer-login
 node --check scripts/bitcoffer-login.mjs
-cp scripts/bitcoffer-login /tmp/bitcoffer-login-shim.mjs && node --check /tmp/bitcoffer-login-shim.mjs
+node --test tests/login.test.mjs
+sh tests/launcher.test.sh
 ```
 
-The last line is not a typo: `scripts/bitcoffer-login` is a Node ESM shim with no file extension — it has to be callable as `bitcoffer-login` on `PATH` — so `node --check` will parse it as CommonJS and choke on its `import`. Copying it to a `.mjs` name is the cheapest way to syntax-check it.
+`scripts/bitcoffer-login` is a small `sh` shim that forwards argv to `bitcoffer-login.mjs` beside it; the real logic and the unit-testable helpers live in the `.mjs` file.
 
 Then exercise the resolution order by hand — the cases that break in practice are the boring ones:
 

@@ -57,14 +57,13 @@ The subprocess reads the value from `process.env.ENV_NAME` (`$ENV_NAME` in a she
 
 ### 3. Web login (browser automation)
 
-If `bitcoffer-login` is on PATH (this repo's `scripts/bitcoffer-login`), launch it via `run_with_secret` with `node` as cmd. The password is injected through the environment; the helper fills the form and reuses a persistent profile:
+If `bitcoffer-login` is on PATH (this repo's `scripts/bitcoffer-login`), launch it via `run_with_secret` with the shim as `cmd`. The password is injected through the environment; the helper fills the form and reuses a persistent profile:
 
 ```
 run_with_secret {
   secret: "<password item name>",
-  cmd: "node",
-  args: ["bitcoffer-login",
-         "--url", "https://<site>/<login>",
+  cmd: "bitcoffer-login",
+  args: ["--url", "https://<site>/<login>",
          "--email", "<username>",
          "--password-env", "PASSWORD",
          "--smoke"],                       // start with --smoke to verify fields can be located, then do a real login

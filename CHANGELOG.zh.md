@@ -8,6 +8,22 @@
 
 ## [未发布]
 
+### 修复
+
+- `scripts/bitcoffer-login.mjs` —— `--smoke` 与 `--no-submit` 现在在必需字段无法定位/填充时会报告失败（`fields-missing` / `fill-incomplete`），不再无条件宣称成功。
+- `scripts/bitcoffer-login.mjs` —— 未提供成功信号时报告 `submitted-unconfirmed` 而非误导性的 `timeout`；单步操作超时与成功轮询截止时间分离（`--op-timeout-ms`、`--goto-timeout-ms`）。
+- `scripts/bitcoffer-login.mjs` —— 页面错误文本不再写入回执；支持 `--flag=value`；`--help` 以 0 退出；`--close` 在运行结束后关闭浏览器。
+- `scripts/bitcoffer-launch.sh` —— 校验 `$BITCOFFER_BIN` 可执行并在失败时明确报错；`active-vault` 指针拒绝路径分隔符/目录穿越，不再盲目信任。
+- `README.md` —— `run_with_secret` 注入单个密钥值，与 skill 及 schema 一致。
+
+### 变更
+
+- `scripts/bitcoffer-login` 改为一小段 `sh` 壳，把 argv 转发给 `bitcoffer-login.mjs`；`.mjs` 是唯一被语法检查的源。
+
+### 新增
+
+- `tests/` —— launcher 解析顺序与 fail-closed 行为的行为测试，以及登录助手参数解析与字段/密码纯函数的单元测试。
+
 ## [0.1.0] — 2026-11-16
 
 首个打 tag 的版本。处于 1.0 之前：路径与 skill 措辞可能在小版本之间变化。
