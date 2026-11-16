@@ -1,5 +1,7 @@
 # Cursor ← Bitcoffer
 
+**English** | [简体中文](cursor.zh.md)
+
 Drop path: `~/.cursor/mcp.json`. **Only add or update `mcpServers.bitcoffer`; do not overwrite the whole file.**
 
 ## 1) MCP

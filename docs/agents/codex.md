@@ -1,5 +1,7 @@
 # Codex ← Bitcoffer
 
+**English** | [简体中文](codex.zh.md)
+
 ## 1) MCP → `~/.codex/config.toml`
 
 ```bash

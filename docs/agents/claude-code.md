@@ -1,5 +1,7 @@
 # Claude Code ← Bitcoffer
 
+**English** | [简体中文](claude-code.zh.md)
+
 Same as the other hosts: point MCP config at the shared launch script [`scripts/bitcoffer-launch.sh`](../../scripts/bitcoffer-launch.sh), and use the rules in [rules.md](rules.md). Shared skills live at the repo root under [`skills/`](../../skills/).
 
 ## 1) MCP

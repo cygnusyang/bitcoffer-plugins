@@ -1,5 +1,7 @@
 # WorkBuddy ← Bitcoffer
 
+**English** | [简体中文](workbuddy.zh.md)
+
 Drop path: `~/.workbuddy/mcp.json`. **Only add or update `mcpServers.bitcoffer`; do not overwrite the whole file.**
 
 ## 1) MCP

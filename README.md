@@ -1,5 +1,7 @@
 # Bitcoffer MCP server
 
+**English** | [简体中文](README.zh.md)
+
 A local-first, offline **secrets manager** for AI coding tools. Bitcoffer keeps your passwords, API keys and tokens in an encrypted vault on your Mac, and this repository packages the **MCP server** that wires that vault into Claude Code, Cursor, Codex, WorkBuddy, or any MCP host — without a secret ever leaving your machine.
 
 > This repository contains **only** the MCP launcher, shared skills, and host paste packs. It contains **no application source code**. Bitcoffer itself is proprietary software; download the app from <https://ai.cygnusyang.top/bitcoffer/>.
@@ -83,10 +85,29 @@ Per-host paste packs (Claude Code, Cursor, Codex, WorkBuddy) and a universal `to
 | `skills/` | Host-agnostic skills: `bitcoffer-credentials` (use secrets) and `bitcoffer-setup` (diagnose/repair) |
 | `docs/agents/` | Per-host paste packs and MCP config snippets |
 
+## Languages
+
+Every document ships in English and Simplified Chinese. English files carry a `简体中文` link at the top; Chinese files carry an `English` link back.
+
+| English | 简体中文 |
+| --- | --- |
+| [README.md](README.md) | [README.zh.md](README.zh.md) |
+| [docs/agents/README.md](docs/agents/README.md) | [docs/agents/README.zh.md](docs/agents/README.zh.md) |
+| [docs/agents/claude-code.md](docs/agents/claude-code.md) | [docs/agents/claude-code.zh.md](docs/agents/claude-code.zh.md) |
+| [docs/agents/codex.md](docs/agents/codex.md) | [docs/agents/codex.zh.md](docs/agents/codex.zh.md) |
+| [docs/agents/cursor.md](docs/agents/cursor.md) | [docs/agents/cursor.zh.md](docs/agents/cursor.zh.md) |
+| [docs/agents/workbuddy.md](docs/agents/workbuddy.md) | [docs/agents/workbuddy.zh.md](docs/agents/workbuddy.zh.md) |
+| [docs/agents/rules.md](docs/agents/rules.md) | [docs/agents/rules.zh.md](docs/agents/rules.zh.md) |
+| [skills/README.md](skills/README.md) | [skills/README.zh.md](skills/README.zh.md) |
+| [skills/bitcoffer-credentials/SKILL.md](skills/bitcoffer-credentials/SKILL.md) | [SKILL.zh.md](skills/bitcoffer-credentials/SKILL.zh.md) |
+| [skills/bitcoffer-setup/SKILL.md](skills/bitcoffer-setup/SKILL.md) | [SKILL.zh.md](skills/bitcoffer-setup/SKILL.zh.md) |
+
+Convention: English is the source of truth and the file an agent loads; the Chinese file is a full parallel translation, not a summary.
+
 ## Status
 
 Early. Skill and script paths may change between releases; pin to a tag if you depend on a specific shape.
 
 ## License
 
-Proprietary. See [LICENSE.md](LICENSE.md). The skills and scripts are provided for use with the Bitcoffer application; redistribution and derivative distribution are not permitted.
+[MIT](LICENSE). You may use, modify, redistribute and sell this code, provided the copyright notice and the license text are kept. The license covers the skills, scripts and docs in this repository only — the Bitcoffer application itself remains proprietary and is governed by the terms you accept when you install it.

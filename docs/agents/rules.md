@@ -1,5 +1,7 @@
 # Bitcoffer rules snippet (paste into the host's rules file)
 
+**English** | [简体中文](rules.zh.md)
+
 Core rule: **Use Secret, not Read Secret** — secrets are injected into a subprocess environment only via `run_with_secret`, and must never enter the model context.
 
 ```markdown

@@ -5,6 +5,8 @@ description: Use centrally-managed secrets (passwords/API keys) via the Bitcoffe
 
 # Bitcoffer Credentials — Use secrets, don't read them
 
+**English** | [简体中文](SKILL.zh.md)
+
 Bitcoffer is a local gateway for centrally managed passwords and keys (data never leaves this machine). This skill explains how to use those credentials through the MCP tools provided by the local Bitcoffer App — the **core rule is "Use Secret, not Read Secret"**: credential values are injected only into a subprocess environment and must never enter the model context.
 
 Download: https://ai.cygnusyang.top/bitcoffer/

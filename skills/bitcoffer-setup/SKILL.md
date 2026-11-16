@@ -5,6 +5,8 @@ description: Diagnose and repair the Bitcoffer MCP connection — run when Bitco
 
 # Bitcoffer Setup — Diagnose and repair the bitcoffer MCP connection
 
+**English** | [简体中文](SKILL.zh.md)
+
 Use this skill when Bitcoffer MCP tools are missing, the server fails to connect, or you are using bitcoffer for the first time on a new machine. Work through the checks in order; that is the fastest way to hit the root cause.
 
 Download: https://ai.cygnusyang.top/bitcoffer/

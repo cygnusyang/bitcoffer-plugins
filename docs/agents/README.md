@@ -1,5 +1,7 @@
 # Bitcoffer · AI host paste packs
 
+**English** | [简体中文](README.zh.md)
+
 Paste-ready MCP + rules for four hosts.
 
 > Goal: copy → connect → `tools/list` shows **4** tools:

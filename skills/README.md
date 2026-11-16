@@ -1,5 +1,7 @@
 # Bitcoffer shared skills
 
+**English** | [简体中文](README.zh.md)
+
 This directory is the **single source** for host-agnostic Bitcoffer skills (also the tree a skill registry should package). Do not fork these bodies per host.
 
 | Skill | Purpose |
