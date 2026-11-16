@@ -55,6 +55,10 @@ sh tests/launcher.test.sh
 
 用 [`docs/agents/README.md`](docs/agents/README.zh.md) 里的探针端到端验一遍 MCP 表面——应恰好 **4** 个工具。
 
+## 安装 / 卸载验证
+
+`tests/install.test.sh` 会安装真实的 Bitcoffer cask，用 `--zap` 卸载，并断言 app 与 zap 路径已清除、`~/.bitcoffer/vaults` 仍保留。它对现有安装具有破坏性，因此当 `/Applications/Bitcoffer.app` 已存在时会**拒绝运行**——只在一次性的 macOS 环境中跑（`install-check` workflow 在 `macos-14` runner 上执行）。它不在每个 PR 的 CI 里；通过 `workflow_dispatch`、每周定时或发版触发。
+
 ## 新增宿主
 
 1. `docs/agents/<host>.md` + `docs/agents/<host>.zh.md`。

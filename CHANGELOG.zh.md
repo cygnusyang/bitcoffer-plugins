@@ -23,6 +23,7 @@
 ### 新增
 
 - `tests/` —— launcher 解析顺序与 fail-closed 行为的行为测试，以及登录助手参数解析与字段/密码纯函数的单元测试。
+- `tests/install.test.sh` + `.github/workflows/install-check.yml` —— 在一次性 `macos-14` runner 里端到端验证 cask 的安装/卸载。已存在安装时拒绝运行；断言 app、zap 路径与 Caskroom 均已清除，而 `~/.bitcoffer/vaults` 按 caveats 保留。
 
 ## [0.1.0] — 2026-11-16
 

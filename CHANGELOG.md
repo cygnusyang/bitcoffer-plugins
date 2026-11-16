@@ -23,6 +23,7 @@ This repository versions the **launcher, skills and host configs**. It does not 
 ### Added
 
 - `tests/` — behavioural tests for the launcher's resolution order and fail-closed behaviour, plus unit tests for the login helper's argument parsing and field/password helpers.
+- `tests/install.test.sh` + `.github/workflows/install-check.yml` — end-to-end cask install/uninstall check in a throwaway `macos-14` runner. It refuses to run where an install already exists, then asserts the app, zap paths and Caskroom are removed while `~/.bitcoffer/vaults` is preserved.
 
 ## [0.1.0] — 2026-11-16
 
