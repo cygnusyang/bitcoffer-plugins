@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq shellcheck
-          shellcheck -s sh scripts/bitcoffer-launch.sh scripts/bitcoffer-login
+          shellcheck -s sh scripts/bitcoffer-launch.sh scripts/bitcoffer-login tests/launcher.test.sh tests/install.test.sh
       - name: node --check
         run: node --check scripts/bitcoffer-login.mjs
       - name: launcher and shim are executable

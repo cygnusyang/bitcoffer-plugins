@@ -1,0 +1,30 @@
+name: Install / uninstall check
+
+# Real end-to-end check of the Bitcoffer cask in a throwaway macOS runner:
+# install → assert → uninstall --zap → assert clean (and vault preserved).
+# Deliberately not on every PR: it downloads and installs the app, which is
+# slow and needs network. Run it manually, weekly, or on a release.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"   # every Monday 06:00 UTC
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  cask:
+    name: Install -> uninstall -> assert clean
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure the runner is clean
+        run: |
+          set -eu
+          test ! -e /Applications/Bitcoffer.app
+          brew --version
+      - name: Run install/uninstall test
+        run: sh tests/install.test.sh
