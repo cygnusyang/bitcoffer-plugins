@@ -28,7 +28,12 @@ VAULT_ROOT="$HOME/.bitcoffer/vaults"
 
 # --- 1. locate the bitcoffer binary -------------------------------------------
 if [ -n "${BITCOFFER_BIN:-}" ]; then
-  BIN="$BITCOFFER_BIN"
+  if [ -x "$BITCOFFER_BIN" ]; then
+    BIN="$BITCOFFER_BIN"
+  else
+    echo "[bitcoffer-launch] \$BITCOFFER_BIN is set to '$BITCOFFER_BIN' but it is not executable. Unset it or fix the path." >&2
+    exit 1
+  fi
 elif [ -x "$HELPER_BIN" ]; then
   BIN="$HELPER_BIN"
 elif [ -x "$STANDALONE_APP_BIN" ]; then
@@ -70,7 +75,12 @@ if [ -z "${BITCOFFER_VAULT_DIR:-}" ]; then
   VAULT=""
   if [ -f "$VAULT_ROOT/active-vault" ]; then
     ACTIVE="$(tr -d '[:space:]' < "$VAULT_ROOT/active-vault")"
-    [ -n "$ACTIVE" ] && [ -d "$VAULT_ROOT/$ACTIVE" ] && VAULT="$VAULT_ROOT/$ACTIVE"
+    case "$ACTIVE" in
+      # Accept only a bare directory name; reject path separators and traversal
+      # so a malformed pointer cannot escape $VAULT_ROOT.
+      */*|*..*) : ;;
+      *) [ -n "$ACTIVE" ] && [ -d "$VAULT_ROOT/$ACTIVE" ] && VAULT="$VAULT_ROOT/$ACTIVE" ;;
+    esac
   fi
   if [ -z "$VAULT" ]; then
     # Vault directories are UUIDs created by the app, so `ls` is safe here;
