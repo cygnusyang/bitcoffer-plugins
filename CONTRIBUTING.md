@@ -57,7 +57,7 @@ Verify the MCP surface end to end with the probe in [`docs/agents/README.md`](do
 
 ## Install / uninstall check
 
-`tests/install.test.sh` installs the real Bitcoffer cask, uninstalls it with `--zap`, and asserts the app and zap paths are gone while `~/.bitcoffer/vaults` survives. It is destructive to an existing install, so it **refuses to run** where `/Applications/Bitcoffer.app` already exists — run it only in a throwaway macOS environment (the `install-check` workflow does that on a `macos-14` runner). It is not part of the per-PR CI; trigger it via `workflow_dispatch`, the weekly schedule, or a release.
+`tests/install.test.sh` installs the real Bitcoffer cask, uninstalls it with `--zap`, and asserts the app and zap paths are gone while `~/.bitcoffer/vaults` survives. It is destructive to an existing install, so it **refuses to run** where `/Applications/Bitcoffer.app` already exists — run it only in a throwaway macOS environment (the `install-check` workflow does that on a `macos-latest` runner). It is not part of the per-PR CI; trigger it via `workflow_dispatch`, the weekly schedule, or a release.
 
 ## Adding a host
 
